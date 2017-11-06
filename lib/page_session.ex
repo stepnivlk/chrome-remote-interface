@@ -88,9 +88,10 @@ defmodule ChromeRemoteInterface.PageSession do
   """
   def execute_command(pid, method, params, opts) do
     async = Keyword.get(opts, :async, false)
+    timeout = Keyword.get(opts, :timeout, 30_000)
 
     case async do
-      false -> call(pid, method, params)
+      false -> call(pid, method, params, timeout)
       true -> cast(pid, method, params, self())
       from when is_pid(from) -> cast(pid, method, params, from)
     end
@@ -99,8 +100,8 @@ defmodule ChromeRemoteInterface.PageSession do
   @doc """
   Executes a raw JSON RPC command through Websockets.
   """
-  def call(pid, method, params) do
-    GenServer.call(pid, {:call_command, method, params})
+  def call(pid, method, params, timeout) do
+    GenServer.call(pid, {:call_command, method, params}, timeout)
   end
 
   @doc """
